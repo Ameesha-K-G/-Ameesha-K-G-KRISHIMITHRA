@@ -1,0 +1,7 @@
+{
+  "name": "Krishi-Mitra (കൃഷി-മിത്ര)",
+  "description": "Offline-ready plant disease detection specifically for Kerala crops (Coconut, Paddy, Banana). Real-time local inference supported.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

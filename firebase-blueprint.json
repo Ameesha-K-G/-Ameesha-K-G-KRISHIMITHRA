@@ -1,0 +1,42 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information including location.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique user ID from Firebase Auth." },
+        "username": { "type": "string", "description": "The user's display name." },
+        "email": { "type": "string", "format": "email", "description": "The user's email address." },
+        "location": { "type": "string", "description": "The user's location in Kerala." },
+        "role": { "type": "string", "enum": ["user", "admin"], "description": "The user's role." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The time the user account was created." }
+      },
+      "required": ["uid", "username", "email", "location", "role", "createdAt"]
+    },
+    "Scan": {
+      "title": "Crop Scan Result",
+      "description": "The result of a crop disease analysis.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique user ID who performed the scan." },
+        "crop": { "type": "string", "description": "The type of crop scanned." },
+        "disease": { "type": "string", "description": "The detected disease." },
+        "confidence": { "type": "number", "description": "The confidence level of the detection." },
+        "imageUrl": { "type": "string", "description": "The URL or base64 of the scanned image." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "The time the scan was performed." }
+      },
+      "required": ["uid", "crop", "disease", "confidence", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Collection of user profiles."
+    },
+    "/scans/{scanId}": {
+      "schema": "Scan",
+      "description": "Collection of crop scan results."
+    }
+  }
+}

@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId} (matches Firebase Auth UID)
+    // Fields:
+    //   - uid: string (required) - The unique user ID.
+    //   - username: string (required, 1-50 chars) - Display name.
+    //   - email: string (required, email format) - Email address.
+    //   - location: string (required, 1-100 chars) - User's location.
+    //   - role: string (required, ['user', 'admin']) - User role.
+    //   - createdAt: string (required, ISO 8601) - Creation timestamp.
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        ((request.auth.token.email == "ameeshakg@gmail.com" && request.auth.token.email_verified == true) || 
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string &&
+        dateStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(['uid', 'username', 'email', 'location', 'role', 'createdAt']) &&
+             hasOnlyAllowedFields(['uid', 'username', 'email', 'location', 'role', 'createdAt']) &&
+             data.uid == request.auth.uid &&
+             data.username is string && data.username.size() >= 1 && data.username.size() <= 50 &&
+             isValidEmail(data.email) &&
+             data.location is string && data.location.size() >= 1 && data.location.size() <= 100 &&
+             data.role in ['user', 'admin'] &&
+             isValidDateString(data.createdAt);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /scans/{scanId} {
+      // Users can read their own scans. Admins can read all scans.
+      allow read: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+      
+      // Users can create a scan if they are authenticated and the uid matches.
+      allow create: if isAuthenticated() && 
+                      request.resource.data.uid == request.auth.uid &&
+                      hasRequiredFields(['uid', 'crop', 'disease', 'confidence', 'timestamp']) &&
+                      isValidDateString(request.resource.data.timestamp);
+      
+      // Scans are immutable for users. Only admins can delete.
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      // Users can always read their own profile
+      allow get: if isOwner(userId);
+      
+      // Admins can read (get and list) all profiles
+      allow read: if isAdmin();
+      
+      // Users can create their own profile if they are authenticated and data is valid.
+      // Non-admins cannot set their role to 'admin' initially.
+      allow create: if isOwner(userId) && 
+                      isValidUser(request.resource.data) && 
+                      (request.resource.data.role == 'user' || isAdmin());
+      
+      // Users can update their own profile. Role cannot be changed by non-admins.
+      allow update: if isOwner(userId) && 
+                      isValidUser(request.resource.data) && 
+                      (request.resource.data.role == resource.data.role || isAdmin());
+      
+      // Only admins can delete users.
+      allow delete: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
