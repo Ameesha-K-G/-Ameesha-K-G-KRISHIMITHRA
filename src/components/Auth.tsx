@@ -42,7 +42,12 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
       );
     }
     if (err.code === 'auth/invalid-credential') {
-      return "Invalid email or password. Please check your credentials and try again.";
+      return (
+        <span>
+          Invalid credentials. Please check your email and password. 
+          {isLogin && <><br /><br />New here? <button type="button" onClick={() => setIsLogin(false)} className="underline font-bold">Create an account</button> instead.</>}
+        </span>
+      );
     }
     if (err.code === 'auth/popup-closed-by-user') {
       return "Sign-in popup was closed before completion. Please try again.";
@@ -83,19 +88,22 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
     setLoading(true);
     setError(null);
 
+    const cleanEmail = email.trim();
+    const cleanUsername = username.trim();
+
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, cleanEmail, password);
       } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, password);
         const user = userCredential.user;
 
-        await updateProfile(user, { displayName: username });
+        await updateProfile(user, { displayName: cleanUsername });
 
         const userData = {
           uid: user.uid,
-          username,
-          email,
+          username: cleanUsername,
+          email: cleanEmail,
           location,
           role: 'user',
           createdAt: new Date().toISOString()
