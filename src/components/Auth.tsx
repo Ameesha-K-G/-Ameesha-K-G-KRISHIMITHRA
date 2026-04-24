@@ -35,7 +35,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
           <br /><br />
           <strong>Action Required:</strong>
           <br />
-          1. Go to your <a href="https://console.firebase.google.com/project/project-bb0eab64-7dfc-4762-a71/authentication/providers" target="_blank" rel="noopener noreferrer" className="underline font-bold">Firebase Console</a>.
+          1. Go to your <a href={`https://console.firebase.google.com/project/${import.meta.env.VITE_FIREBASE_PROJECT_ID || 'project-bb0eab64-7dfc-4762-a71'}/authentication/providers`} target="_blank" rel="noopener noreferrer" className="underline font-bold">Firebase Console</a>.
           <br />
           2. Click <strong>"Enable"</strong> for the <strong>"{method === 'Email/Password' ? 'Email/Password' : method}"</strong> provider.
         </span>
