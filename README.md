@@ -1,5 +1,11 @@
 # Krishi-Mitra (കൃഷി-മിത്ര) 🌿
 
+[![Live Demo](https://img.shields.io/badge/Krishi--Mitra-Live%20Demo-green?style=for-the-badge&logo=google-cloud&logoColor=white)](https://krishi-mitra-494619873022.asia-southeast1.run.app)
+
+> **Try the App Live!** Run and interact with the clean, full-screen live application:  
+> 👉 **[Launch Krishi-Mitra Live Application](https://krishi-mitra-494619873022.asia-southeast1.run.app)** 👈
+
+
 ## Problem Statement
 Farmers in Kerala face significant crop losses due to localized diseases like Coconut Root Wilt, Rice Blast, and Banana Bunchy Top. Traditional diagnosis is slow, often requiring expert visits to remote farms. Furthermore, technical agricultural advice is frequently unavailable in the local language (Malayalam), creating a barrier for effective disease management.
 
